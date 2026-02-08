@@ -1,0 +1,5 @@
+{
+  "name": "FinanceX",
+  "description": "A minimalist, high-performance local finance tracker inspired by modern design systems like Next.js. Features include transaction management, budget tracking, and interactive data visualization.",
+  "requestFramePermissions": []
+}
