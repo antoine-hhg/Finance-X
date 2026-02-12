@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>iFinance 14 · FINAL · % · Diagramm-Wechsel · Datenverwaltung</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- js-cookie -->
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ========== APPLE DARK · NUR ROT & GRÜN ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, 'Helvetica Neue', 'SF Pro Display', 'SF Pro Text', sans-serif;
+        }
+
+        body {
+            background-color: #000000;
+            background: radial-gradient(circle at 50% 0%, #0e0e0e, #030303);
+            color: #f5f5f7;
+            padding: 16px 12px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(22, 22, 26, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+            padding: 18px 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+            width: 100%;
+            max-width: 440px;
+            margin-bottom: 14px;
+        }
+
+        h1, h2, h3, h4 {
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        h1 {
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+
+        .green, .green-text {
+            color: #34c759 !important;
+        }
+        .red, .red-text {
+            color: #ff3b30 !important;
+        }
+        .bg-green {
+            background: #34c759 !important;
+            color: black !important;
+        }
+        .bg-red {
+            background: #ff3b30 !important;
+            color: white !important;
+        }
+
+        .btn, button {
+            border: none;
+            border-radius: 40px;
+            padding: 12px 18px;
+            font-size: 16px;
+            font-weight: 500;
+            background: rgba(80, 80, 90, 0.4);
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 0.3px solid rgba(255,255,255,0.1);
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .btn-green {
+            background: #34c759;
+            color: black;
+            font-weight: 600;
+        }
+        .btn-red {
+            background: #ff3b30;
+            color: white;
+        }
+
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 4px;
+            cursor: pointer;
+            border-bottom: 0.5px solid rgba(255,255,255,0.1);
+            margin-bottom: 8px;
+        }
+        .collapsible-header h3 {
+            margin: 0;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .collapsible-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .collapsible-content.collapsed {
+            max-height: 0;
+            margin: 0;
+            padding: 0;
+        }
+        .chevron {
+            transition: transform 0.3s;
+            font-size: 18px;
+            color: #34c759;
+        }
+        .chevron.rotated {
+            transform: rotate(180deg);
+        }
+
+        /* ===== STATS MIT % ===== */
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+            margin: 10px 0 4px;
+        }
+        .stat-badge {
+            background: rgba(50, 50, 55, 0.7);
+            border-radius: 18px;
+            padding: 10px 4px;
+            flex: 1;
+            text-align: center;
+            border: 0.2px solid rgba(255,255,255,0.1);
+        }
+        .stat-label {
+            font-size: 11px;
+            color: #a1a1a8;
+            margin-bottom: 2px;
+            white-space: nowrap;
+        }
+        .stat-number {
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.2;
+            color: white;
+        }
+        .stat-percent {
+            font-size: 11px;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .input-field, select {
+            background: rgba(28, 28, 32, 0.95);
+            border: 0.5px solid rgba(255,255,255,0.2);
+            border-radius: 14px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 16px;
+            width: 100%;
+        }
+        .input-field::placeholder {
+            color: #8e8e93;
+        }
+        select option {
+            background: #1c1c1e;
+            color: white;
+        }
+
+        .category-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .category-chip {
+            background: rgba(80, 80, 90, 0.5);
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 14px;
+            border: 0.5px solid rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+        }
+        .category-chip.active {
+            background: #34c759;
+            color: black;
+            font-weight: 600;
+            border: none;
+        }
+
+        .debt-item {
+            background: rgba(44,44,48,0.7);
+            border-radius: 18px;
+            padding: 16px;
+            margin: 12px 0;
+            border-left: 6px solid #34c759;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .debt-item.owe {
+            border-left-color: #ff3b30;
+        }
+        .reminder-badge {
+            background: rgba(255,59,48,0.2);
+            color: #ff3b30;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 13px;
+        }
+        .paid-badge {
+            background: #34c759;
+            color: black;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 13px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 180px;
+            background: rgba(10,10,12,0.6);
+            border-radius: 18px;
+            padding: 8px;
+            margin-top: 8px;
+            display: block !important;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .divider {
+            height: 0.5px;
+            background: rgba(255,255,255,0.15);
+            margin: 16px 0;
+        }
+
+        .data-footer {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 440px;
+        }
+        
+        /* ===== DIAGRAMM-WECHSEL ===== */
+        .chart-type-selector {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .chart-type-btn {
+            flex: 1;
+            background: rgba(80, 80, 90, 0.3);
+            border: 0.5px solid rgba(255,255,255,0.1);
+            padding: 10px 0;
+            border-radius: 30px;
+            font-size: 14px;
+            color: white;
+            cursor: pointer;
+        }
+        .chart-type-btn.active {
+            background: #34c759;
+            color: white !important;
+            font-weight: 600;
+            border: none;
+        }
+        .chart-type-btn.active i {
+            color: white !important;
+        }
+
+        /* ===== KALENDER ===== */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(40, 40, 45, 0.6);
+            border-radius: 12px;
+            padding: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            border: 2px solid transparent;
+        }
+        .calendar-day.positive {
+            border: 2px solid #34c759;
+        }
+        .calendar-day.negative {
+            border: 2px solid #ff3b30;
+        }
+        .calendar-day.selected {
+            background: #34c759;
+            color: black;
+            font-weight: 600;
+        }
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+        .weekday {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 12px;
+            color: #a1a1a8;
+            padding: 8px 0;
+        }
+        .date-range-input {
+            background: rgba(28,28,32,0.95);
+            border: 0.5px solid rgba(255,255,255,0.2);
+            border-radius: 14px;
+            padding: 10px 16px;
+            color: white;
+            font-size: 14px;
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .modal-content {
+            max-width: 440px;
+            margin: 0 auto;
+            background: rgba(22,22,26,0.98);
+            border-radius: 32px;
+            padding: 24px;
+            border: 0.5px solid rgba(255,255,255,0.1);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-close {
+            font-size: 24px;
+            cursor: pointer;
+            color: #ff3b30;
+        }
+        .modal-canvas {
+            width: 100%;
+            height: 180px;
+            background: rgba(10,10,12,0.6);
+            border-radius: 18px;
+            padding: 8px;
+            display: block !important;
+        }
+        .transaction-log {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 16px;
+        }
+        .log-entry {
+            background: rgba(44,44,48,0.7);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .log-date {
+            color: #a1a1a8;
+            font-size: 14px;
+        }
+        .log-category {
+            background: rgba(52,199,89,0.15);
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 13px;
+            color: #34c759;
+        }
+        .log-amount {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+        /* ===== WÄHRUNGEN ===== */
+        .currency-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+            background: rgba(52,199,89,0.1);
+            border-radius: 16px;
+            padding: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== HAUPTKOPF MIT % ========== -->
+    <div class="glass-panel" style="padding-bottom: 12px;">
+        <h1>
+            <i class="fas fa-chart-simple" style="color: #34c759;"></i> iFinance 14
+            <span style="font-size: 14px; background: #2c2c2e; padding: 5px 14px; border-radius: 40px; color: #34c759; margin-left: auto;">€ EUR</span>
+        </h1>
+        <div class="stats-row">
+            <div class="stat-badge">
+                <div class="stat-label"><i class="fas fa-wallet"></i> Balance</div>
+                <div class="stat-number" id="balanceDisplay">€0.00</div>
+                <div class="stat-percent" id="balancePercent">+0.0%</div>
+            </div>
+            <div class="stat-badge">
+                <div class="stat-label"><i class="fas fa-calendar-alt"></i> Monat</div>
+                <div class="stat-number" id="monthChange">+€0.00</div>
+                <div class="stat-percent" id="monthPercent">+0.0%</div>
+            </div>
+            <div class="stat-badge">
+                <div class="stat-label"><i class="fas fa-clock"></i> Woche</div>
+                <div class="stat-number" id="weekChange">+€0.00</div>
+                <div class="stat-percent" id="weekPercent">+0.0%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== VERMÖGENSVERLAUF MIT DIAGRAMM-WECHSEL ========== -->
+    <div class="glass-panel">
+        <div class="collapsible-header" onclick="toggleSection('section1')">
+            <h3><i class="fas fa-chart-line" style="color: #34c759;"></i> Vermögensverlauf</h3>
+            <i class="fas fa-chevron-down chevron" id="chevron1" style="color: #34c759;"></i>
+        </div>
+        <div id="section1" class="collapsible-content">
+            <canvas id="balanceChart"></canvas>
+            
+            <!-- DIAGRAMM-WECHSEL BUTTONS -->
+            <div class="chart-type-selector">
+                <button id="chartBarBtn" class="chart-type-btn active"><i class="fas fa-chart-bar"></i> Säule</button>
+                <button id="chartPieBtn" class="chart-type-btn"><i class="fas fa-chart-pie"></i> Kuchen</button>
+                <button id="chartLineBtn" class="chart-type-btn"><i class="fas fa-chart-line"></i> Kurve</button>
+            </div>
+            
+            <div class="flex-row" style="justify-content: space-evenly; margin: 16px 0 8px;">
+                <button id="rangeWeekBtn" style="background: #34c75930; color: #34c759; border: 0.5px solid #34c759;"><i class="fas fa-calendar-week"></i> Woche</button>
+                <button id="rangeMonthBtn" style="background: #ff3b3030; color: #ff3b30; border: 0.5px solid #ff3b30;"><i class="fas fa-calendar-alt"></i> Monat</button>
+                <button id="rangeYearBtn" style="background: #ff3b3030; color: #ff3b30; border: 0.5px solid #ff3b30;"><i class="fas fa-calendar"></i> Jahr</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== TRANSAKTION ========== -->
+    <div class="glass-panel">
+        <div class="collapsible-header" onclick="toggleSection('section3')">
+            <h3><i class="fas fa-plus-circle" style="color: #34c759;"></i> Transaktion</h3>
+            <i class="fas fa-chevron-down chevron" id="chevron3" style="color: #34c759;"></i>
+        </div>
+        <div id="section3" class="collapsible-content">
+            <div class="flex-row" style="margin: 16px 0 12px;">
+                <input type="number" id="amountInput" placeholder="Betrag €" class="input-field" style="flex:2;" step="0.01">
+                <select id="typeSelect" class="input-field" style="flex:1.2;">
+                    <option value="intake" style="color: #34c759;">📈 Einnahme</option>
+                    <option value="payment" style="color: #ff3b30;">📉 Ausgabe</option>
+                </select>
+            </div>
+            <div>
+                <span style="color:#a1a1a8; font-size: 14px;"><i class="fas fa-tags"></i> Kategorie:</span>
+                <div id="categoryContainer" class="category-container"></div>
+            </div>
+            <div class="flex-row" style="margin-top: 8px;">
+                <input type="text" id="newCategoryInput" placeholder="Neue Kategorie" class="input-field" style="flex:2;">
+                <button id="addCategoryBtn" style="flex:1; background: #34c759; color: black;"><i class="fas fa-plus"></i> Hinzu</button>
+            </div>
+            <button id="addTransactionBtn" class="btn-green" style="margin-top: 16px; width: 100%;"><i class="fas fa-check"></i> SPEICHERN</button>
+        </div>
+    </div>
+
+    <!-- ========== KALENDER ========== -->
+    <div class="glass-panel">
+        <div class="collapsible-header" onclick="toggleSection('section6')">
+            <h3><i class="fas fa-calendar" style="color: #34c759;"></i> Kalender</h3>
+            <i class="fas fa-chevron-down chevron" id="chevron6" style="color: #34c759;"></i>
+        </div>
+        <div id="section6" class="collapsible-content">
+            <div class="calendar-header">
+                <button id="prevMonthBtn" style="background: none; border: 0.5px solid rgba(255,255,255,0.2); padding: 8px 16px;"><i class="fas fa-chevron-left"></i></button>
+                <h4 id="calendarMonthYear">Februar 2026</h4>
+                <button id="nextMonthBtn" style="background: none; border: 0.5px solid rgba(255,255,255,0.2); padding: 8px 16px;"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            
+            <div class="weekday">
+                <span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+            
+            <!-- ZEITRAUM AUSWAHL -->
+            <div style="margin: 20px 0 12px; padding-top: 16px; border-top: 0.5px solid rgba(255,255,255,0.1);">
+                <h4 style="color: #34c759; margin-bottom: 16px;"><i class="fas fa-calendar-alt"></i> Zeitraum auswählen</h4>
+                <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+                    <input type="date" id="dateRangeStart" class="date-range-input" style="flex:1;">
+                    <span style="color: #a1a1a8;">–</span>
+                    <input type="date" id="dateRangeEnd" class="date-range-input" style="flex:1;">
+                </div>
+                <button id="applyDateRangeBtn" style="width: 100%; background: #34c759; color: black; padding: 14px;">
+                    <i class="fas fa-chart-line"></i> ZEITRAUM AUSWERTEN
+                </button>
+            </div>
+            
+            <p style="color: #a1a1a8; font-size: 13px; text-align: center; margin-top: 12px;">
+                <span style="color: #34c759;">● Positiver Tag</span> · 
+                <span style="color: #ff3b30;">● Negativer Tag</span> · 
+                Klick für Details
+            </p>
+        </div>
+    </div>
+
+    <!-- ========== SCHULDEN ========== -->
+    <div class="glass-panel">
+        <div class="collapsible-header" onclick="toggleSection('section4')">
+            <h3><i class="fas fa-hand-holding-dollar" style="color: #ff3b30;"></i> Schulden</h3>
+            <i class="fas fa-chevron-down chevron" id="chevron4" style="color: #ff3b30;"></i>
+        </div>
+        <div id="section4" class="collapsible-content">
+            <div id="debtsList" style="margin: 12px 0;"></div>
+            
+            <div style="margin: 16px 0 12px;">
+                <div class="flex-row" style="margin-bottom: 8px;">
+                    <input type="text" id="debtPersonInput" placeholder="Name" class="input-field" style="flex:2;">
+                    <input type="number" id="debtAmountInput" placeholder="Betrag €" class="input-field" style="flex:1;" step="0.01">
+                </div>
+                <div class="flex-row" style="margin-bottom: 8px;">
+                    <input type="text" id="debtPurposeInput" placeholder="Wofür?" class="input-field" style="flex:2;">
+                    <input type="date" id="debtDueDateInput" class="input-field" style="flex:1.5;">
+                </div>
+                <div class="flex-row" style="gap: 12px; margin-top: 12px;">
+                    <button id="addDebtBtn" style="flex:1; background: #ff3b30;"><i class="fas fa-arrow-left"></i> Ich schulde</button>
+                    <button id="addOwedBtn" style="flex:1; background: #34c759; color: black;"><i class="fas fa-arrow-right"></i> Schuldet mir</button>
+                </div>
+            </div>
+            
+            <label style="display: flex; align-items: center; gap: 12px; margin-top: 20px; background: rgba(255,59,48,0.1); padding: 14px; border-radius: 16px;">
+                <input type="checkbox" id="reminderToggle" style="width: 22px; height: 22px; accent-color: #ff3b30;" checked>
+                <span style="color: white;"><i class="fas fa-bell" style="color: #ff3b30;"></i> Erinnerung bei überfälligen Schulden</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- ========== WÄHRUNGSRECHNER ========== -->
+    <div class="glass-panel">
+        <div class="collapsible-header" onclick="toggleSection('section5')">
+            <h3><i class="fas fa-euro-sign" style="color: #34c759;"></i> Währungsrechner</h3>
+            <i class="fas fa-chevron-down chevron" id="chevron5" style="color: #34c759;"></i>
+        </div>
+        <div id="section5" class="collapsible-content collapsed">
+            <div class="flex-row" style="margin: 16px 0 8px;">
+                <input type="number" id="convAmount" placeholder="1.00" class="input-field" style="flex:1.5;" value="1.00" step="0.01">
+                <select id="convFrom" class="input-field" style="flex:1;">
+                    <option value="EUR">€ EUR</option>
+                    <option value="USD">$ USD</option>
+                    <option value="GBP">£ GBP</option>
+                    <option value="CHF">₣ CHF</option>
+                    <option value="JPY">¥ JPY</option>
+                    <option value="TRY">₺ TRY</option>
+                </select>
+            </div>
+            
+            <div style="text-align: center; margin: 12px 0;">
+                <i class="fas fa-arrow-down" style="color:#34c759; font-size: 20px;"></i>
+            </div>
+            
+            <div class="flex-row" style="margin-bottom: 16px;">
+                <input type="text" id="convResult" readonly class="input-field" style="flex:1.5;" value="1.09 USD">
+                <select id="convTo" class="input-field" style="flex:1;">
+                    <option value="USD">$ USD</option>
+                    <option value="EUR">€ EUR</option>
+                    <option value="GBP">£ GBP</option>
+                    <option value="CHF">₣ CHF</option>
+                    <option value="JPY">¥ JPY</option>
+                    <option value="TRY">₺ TRY</option>
+                </select>
+            </div>
+            
+            <button id="convertBtn" class="btn-green" style="width: 100%; margin-bottom: 12px;">
+                <i class="fas fa-rotate"></i> KONVERTIEREN
+            </button>
+            
+            <div class="currency-grid">
+                <div style="color: #34c759;">1 EUR =</div>
+                <div style="color: white;">1.09 USD</div>
+                <div style="color: #34c759;">1 EUR =</div>
+                <div style="color: white;">0.85 GBP</div>
+                <div style="color: #34c759;">1 EUR =</div>
+                <div style="color: white;">0.98 CHF</div>
+                <div style="color: #34c759;">1 EUR =</div>
+                <div style="color: white;">164.50 JPY</div>
+                <div style="color: #34c759;">1 EUR =</div>
+                <div style="color: white;">38.75 TRY</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== DATENVERWALTUNG (LÖSCHEN & EXPORT) ========== -->
+    <div class="data-footer">
+        <div class="glass-panel">
+            <div class="collapsible-header" onclick="toggleSection('section2')">
+                <h3><i class="fas fa-rotate-left" style="color: #ff3b30;"></i> Datenverwaltung</h3>
+                <i class="fas fa-chevron-down chevron" id="chevron2" style="color: #ff3b30;"></i>
+            </div>
+            <div id="section2" class="collapsible-content collapsed">
+                <div class="flex-row" style="justify-content: center; gap: 12px; margin: 12px 0 8px;">
+                    <button id="hardResetBtn" class="btn-red" style="flex:1;"><i class="fas fa-exclamation-triangle"></i> ALLES LÖSCHEN</button>
+                    <button id="softResetBtn" style="flex:1; background: rgba(255,59,48,0.5);"><i class="fas fa-broom"></i> Nur Konto</button>
+                </div>
+                <div class="flex-row" style="margin-top: 12px;">
+                    <button id="exportDataBtn" style="flex:1; background: #34c759; color: black;"><i class="fas fa-download"></i> Export JSON</button>
+                    <button id="importDataBtn" style="flex:1; background: #34c759; color: black;"><i class="fas fa-upload"></i> Import</button>
+                    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                </div>
+                <p style="color: #8e8e93; font-size: 12px; margin-top: 12px; text-align: center;">
+                    <i class="fas fa-cookie-bite"></i> Alle Daten werden im Cookie gespeichert
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== DETAIL MODAL ========== -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle" style="color: #34c759;">Detailansicht</h2>
+                <span class="modal-close" onclick="closeModal()"><i class="fas fa-times-circle"></i></span>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div>
+                    <h4 style="color: #34c759; margin-bottom: 8px;"><i class="fas fa-chart-pie"></i> Ausgaben nach Kategorie</h4>
+                    <canvas id="modalPieChart" class="modal-canvas"></canvas>
+                </div>
+                <div>
+                    <h4 style="color: #34c759; margin-bottom: 8px;"><i class="fas fa-chart-bar"></i> Einnahmen vs. Ausgaben</h4>
+                    <canvas id="modalBarChart" class="modal-canvas"></canvas>
+                </div>
+                <div id="modalLineChartContainer">
+                    <h4 style="color: #34c759; margin-bottom: 8px;"><i class="fas fa-chart-line"></i> Verlauf</h4>
+                    <canvas id="modalLineChart" class="modal-canvas"></canvas>
+                </div>
+            </div>
+            
+            <div style="margin-top: 24px;">
+                <h4 style="color: #34c759; margin-bottom: 16px;"><i class="fas fa-list"></i> Transaktions-Log</h4>
+                <div id="modalTransactionLog" class="transaction-log"></div>
+            </div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button onclick="closeModal()" style="flex:1; background: #ff3b30;">Schließen</button>
+                <button id="exportDetailBtn" style="flex:1; background: #34c759; color: black;"><i class="fas fa-download"></i> Export TXT</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== GLOBALE VARIABLEN ==========
+        let modalPieChart = null;
+        let modalBarChart = null;
+        let modalLineChart = null;
+        
+        const COOKIE_KEY = "ifinance14_final_v5";
+        const exchangeRates = {
+            EUR: { USD: 1.09, GBP: 0.85, CHF: 0.98, JPY: 164.50, TRY: 38.75, EUR: 1.00 },
+            USD: { EUR: 0.92, GBP: 0.78, CHF: 0.90, JPY: 151.00, TRY: 35.60, USD: 1.00 },
+            GBP: { EUR: 1.18, USD: 1.28, CHF: 1.15, JPY: 193.50, TRY: 45.60, GBP: 1.00 },
+            CHF: { EUR: 1.02, USD: 1.11, GBP: 0.87, JPY: 168.00, TRY: 39.60, CHF: 1.00 },
+            JPY: { EUR: 0.0061, USD: 0.0066, GBP: 0.0052, CHF: 0.0060, TRY: 0.24, JPY: 1.00 },
+            TRY: { EUR: 0.026, USD: 0.028, GBP: 0.022, CHF: 0.025, JPY: 4.17, TRY: 1.00 }
+        };
+
+        let appData = {
+            transactions: [],
+            debts: [],
+            categories: ['Wohnen', 'Lebensmittel', 'Freizeit', 'Transport', 'Gehalt'],
+            customCategories: []
+        };
+
+        let currentDate = new Date();
+        let selectedDate = null;
+        let selectedCategory = 'Gehalt';
+        let chartInstance = null;
+        let rangeType = 'week';
+        let chartType = 'bar';
+
+        // ========== TOGGLE ==========
+        window.toggleSection = function(sectionId) {
+            const content = document.getElementById(sectionId);
+            const chevron = document.getElementById('chevron' + sectionId.slice(-1));
+            if (content && chevron) {
+                content.classList.toggle('collapsed');
+                chevron.classList.toggle('rotated');
+            }
+        }
+
+        // ========== MODAL ==========
+        window.openModal = function(title, transactions) {
+            const modal = document.getElementById('detailModal');
+            document.getElementById('modalTitle').innerHTML = title;
+            
+            // ALLE alten Charts zerstören
+            if (modalPieChart) { modalPieChart.destroy(); modalPieChart = null; }
+            if (modalBarChart) { modalBarChart.destroy(); modalBarChart = null; }
+            if (modalLineChart) { modalLineChart.destroy(); modalLineChart = null; }
+            
+            // Line Chart Container verstecken bei Einzeltag
+            const isSingleDay = title.includes('Tag:');
+            const lineChartContainer = document.getElementById('modalLineChartContainer');
+            if (lineChartContainer) {
+                lineChartContainer.style.display = isSingleDay ? 'none' : 'block';
+            }
+            
+            // Modal anzeigen
+            modal.style.display = 'block';
+            
+            // Warten bis Canvas sichtbar
+            setTimeout(() => {
+                const pieCanvas = document.getElementById('modalPieChart');
+                const barCanvas = document.getElementById('modalBarChart');
+                const lineCanvas = document.getElementById('modalLineChart');
+                
+                if (!pieCanvas || !barCanvas) return;
+                
+                // Charts erstellen
+                createModalCharts(pieCanvas, barCanvas, lineCanvas, transactions, isSingleDay);
+            }, 200);
+            
+            // Transaction Log
+            renderModalTransactionLog(transactions);
+            
+            // Export Button
+            document.getElementById('exportDetailBtn').onclick = function() {
+                exportDetailData(title, transactions);
+            };
+        }
+
+        window.closeModal = function() {
+            document.getElementById('detailModal').style.display = 'none';
+            if (modalPieChart) { modalPieChart.destroy(); modalPieChart = null; }
+            if (modalBarChart) { modalBarChart.destroy(); modalBarChart = null; }
+            if (modalLineChart) { modalLineChart.destroy(); modalLineChart = null; }
+        }
+
+        function createModalCharts(pieCanvas, barCanvas, lineCanvas, transactions, isSingleDay) {
+            try {
+                // ===== PIE CHART =====
+                const expensesByCategory = {};
+                transactions.filter(t => t.type === 'payment').forEach(t => {
+                    const cat = t.category || 'Allgemein';
+                    expensesByCategory[cat] = (expensesByCategory[cat] || 0) + t.amount;
+                });
+                
+                const pieCtx = pieCanvas.getContext('2d');
+                
+                if (Object.keys(expensesByCategory).length === 0) {
+                    modalPieChart = new Chart(pieCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Keine Ausgaben'],
+                            datasets: [{
+                                data: [1],
+                                backgroundColor: ['#34c759']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: { labels: { color: 'white' } }
+                            }
+                        }
+                    });
+                } else {
+                    const colors = ['#34c759', '#ff3b30', '#34c75980', '#ff3b3080', '#34c75960', '#ff3b3060'];
+                    modalPieChart = new Chart(pieCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: Object.keys(expensesByCategory),
+                            datasets: [{
+                                data: Object.values(expensesByCategory),
+                                backgroundColor: colors.slice(0, Object.keys(expensesByCategory).length)
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: { 
+                                    position: 'bottom',
+                                    labels: { color: 'white', font: { size: 11 } }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // ===== BAR CHART =====
+                const totalIntake = transactions.filter(t => t.type === 'intake').reduce((sum, t) => sum + t.amount, 0);
+                const totalPayment = transactions.filter(t => t.type === 'payment').reduce((sum, t) => sum + t.amount, 0);
+                
+                const barCtx = barCanvas.getContext('2d');
+                modalBarChart = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Einnahmen', 'Ausgaben'],
+                        datasets: [{
+                            data: [totalIntake, totalPayment],
+                            backgroundColor: ['#34c759', '#ff3b30'],
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { 
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { color: '#a1a1a8' }
+                            },
+                            x: { ticks: { color: '#f0f0f4' } }
+                        }
+                    }
+                });
+                
+                // ===== LINE CHART (NUR BEI ZEITRÄUMEN) =====
+                if (!isSingleDay && lineCanvas) {
+                    const sorted = [...transactions].sort((a, b) => a.timestamp - b.timestamp);
+                    const labels = [];
+                    const amounts = [];
+                    let cum = 0;
+                    
+                    sorted.forEach(t => {
+                        const date = new Date(t.timestamp).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+                        labels.push(date);
+                        cum += t.type === 'intake' ? t.amount : -t.amount;
+                        amounts.push(cum);
+                    });
+                    
+                    const lineCtx = lineCanvas.getContext('2d');
+                    modalLineChart = new Chart(lineCtx, {
+                        type: 'line',
+                        data: {
+                            labels: labels.length > 0 ? labels : ['Keine Daten'],
+                            datasets: [{
+                                data: amounts.length > 0 ? amounts : [0],
+                                borderColor: '#34c759',
+                                backgroundColor: 'rgba(52,199,89,0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.1,
+                                pointBackgroundColor: amounts.map((v, i) => {
+                                    if (i === 0) return '#34c759';
+                                    return v >= amounts[i-1] ? '#34c759' : '#ff3b30';
+                                }),
+                                pointBorderColor: 'transparent',
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { 
+                                    grid: { color: 'rgba(255,255,255,0.05)' },
+                                    ticks: { color: '#a1a1a8' }
+                                },
+                                x: { 
+                                    ticks: { color: '#f0f0f4', maxRotation: 45, minRotation: 45 }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Chart Fehler:', e);
+            }
+        }
+
+        function renderModalTransactionLog(transactions) {
+            const container = document.getElementById('modalTransactionLog');
+            if (transactions.length === 0) {
+                container.innerHTML = '<div style="padding: 20px; text-align: center; background: rgba(80,80,90,0.2); border-radius: 16px;">Keine Transaktionen</div>';
+                return;
+            }
+            
+            const sorted = [...transactions].sort((a, b) => b.timestamp - a.timestamp);
+            let html = '';
+            sorted.forEach(t => {
+                const date = new Date(t.timestamp).toLocaleDateString('de-DE');
+                const category = t.category || 'Allgemein';
+                const sign = t.type === 'intake' ? '+' : '-';
+                const color = t.type === 'intake' ? '#34c759' : '#ff3b30';
+                
+                html += `<div class="log-entry">
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span class="log-date">${date}</span>
+                                <span class="log-category">${category}</span>
+                            </div>
+                            <div style="font-weight: 700; color: ${color};">${sign}€${t.amount.toFixed(2)}</div>
+                        </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function exportDetailData(title, transactions) {
+            let dataStr = `iFinance 14 Export - ${title}\n`;
+            dataStr += `========================================\n\n`;
+            dataStr += `Datum: ${new Date().toLocaleDateString('de-DE')}\n`;
+            dataStr += `Anzahl Transaktionen: ${transactions.length}\n`;
+            dataStr += `Einnahmen: €${transactions.filter(t => t.type === 'intake').reduce((s,t) => s + t.amount, 0).toFixed(2)}\n`;
+            dataStr += `Ausgaben: €${transactions.filter(t => t.type === 'payment').reduce((s,t) => s + t.amount, 0).toFixed(2)}\n`;
+            dataStr += `Saldo: €${transactions.reduce((acc, t) => t.type === 'intake' ? acc + t.amount : acc - t.amount, 0).toFixed(2)}\n\n`;
+            dataStr += `TRANSAKTIONEN:\n`;
+            dataStr += `─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─\n\n`;
+            
+            transactions.sort((a,b) => b.timestamp - a.timestamp).forEach(t => {
+                const date = new Date(t.timestamp).toLocaleDateString('de-DE');
+                const type = t.type === 'intake' ? 'EINNAHME' : 'AUSGABE';
+                const category = t.category || 'Allgemein';
+                dataStr += `${date} | ${type} | ${category} | €${t.amount.toFixed(2)}\n`;
+            });
+            
+            const blob = new Blob([dataStr], {type: 'text/plain'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `ifinance_${title.replace(/[^a-z0-9]/gi, '_')}.txt`;
+            a.click();
+        }
+
+        // ========== DATEN ==========
+        function loadFromCookie() {
+            const stored = Cookies.get(COOKIE_KEY);
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    appData = parsed;
+                } catch (e) {}
+            }
+            if (!appData.categories) appData.categories = ['Wohnen', 'Lebensmittel', 'Freizeit', 'Transport', 'Gehalt'];
+            if (!appData.customCategories) appData.customCategories = [];
+            if (!appData.debts) appData.debts = [];
+            if (!appData.transactions) appData.transactions = [];
+            
+            appData.debts.forEach(debt => {
+                if (!debt.purpose) debt.purpose = '';
+                if (!debt.dueDate) debt.dueDate = '';
+                if (!debt.createdAt) debt.createdAt = Date.now();
+                if (!debt.id) debt.id = crypto.randomUUID ? crypto.randomUUID() : Date.now() + Math.random();
+            });
+        }
+
+        function saveToCookie() {
+            Cookies.set(COOKIE_KEY, JSON.stringify(appData), { expires: 400, secure: true, sameSite: 'strict' });
+        }
+
+        // ========== RESET FUNKTIONEN ==========
+        function hardReset() {
+            if (confirm('⚠️ ALLE DATEN unwiderruflich löschen?')) {
+                appData = {
+                    transactions: [],
+                    debts: [],
+                    categories: ['Wohnen', 'Lebensmittel', 'Freizeit', 'Transport', 'Gehalt'],
+                    customCategories: []
+                };
+                saveToCookie();
+                refreshUI();
+                renderCategories();
+                renderCalendar();
+                alert('Alle Daten wurden gelöscht!');
+            }
+        }
+
+        function softReset() {
+            if (confirm('Kontobewegungen und Schulden löschen? Kategorien bleiben erhalten.')) {
+                appData.transactions = [];
+                appData.debts = [];
+                saveToCookie();
+                refreshUI();
+                renderCategories();
+                renderCalendar();
+                alert('Konto wurde zurückgesetzt!');
+            }
+        }
+
+        // ========== BALANCE & PROZENTE ==========
+        function getBalance() {
+            return appData.transactions.reduce((acc, t) => t.type === 'intake' ? acc + t.amount : acc - t.amount, 0);
+        }
+
+        function getDayBalance(dateStr) {
+            const dayTx = appData.transactions.filter(t => {
+                const txDate = new Date(t.timestamp).toISOString().split('T')[0];
+                return txDate === dateStr;
+            });
+            return dayTx.reduce((acc, t) => t.type === 'intake' ? acc + t.amount : acc - t.amount, 0);
+        }
+
+        function getPeriodChange(period) {
+            const now = Date.now();
+            let start;
+            if (period === 'week') start = now - 7 * 86400000;
+            else if (period === 'month') start = now - 30 * 86400000;
+            else start = now - 365 * 86400000;
+            return appData.transactions.filter(t => t.timestamp >= start).reduce((acc, t) => t.type === 'intake' ? acc + t.amount : acc - t.amount, 0);
+        }
+
+        function getPreviousPeriodChange(period) {
+            const now = Date.now();
+            let currentStart, previousStart, previousEnd;
+            
+            if (period === 'week') {
+                currentStart = now - 7 * 86400000;
+                previousStart = now - 14 * 86400000;
+                previousEnd = now - 7 * 86400000;
+            } else if (period === 'month') {
+                currentStart = now - 30 * 86400000;
+                previousStart = now - 60 * 86400000;
+                previousEnd = now - 30 * 86400000;
+            } else {
+                currentStart = now - 365 * 86400000;
+                previousStart = now - 730 * 86400000;
+                previousEnd = now - 365 * 86400000;
+            }
+
+            const current = appData.transactions.filter(t => t.timestamp >= currentStart).reduce((acc, t) => t.type === 'intake' ? acc + t.amount : acc - t.amount, 0);
+            const previous = appData.transactions.filter(t => t.timestamp >= previousStart && t.timestamp < previousEnd).reduce((acc, t) => t.type === 'intake' ? acc + t.amount : acc - t.amount, 0);
+            return { current, previous };
+        }
+
+        // ========== KATEGORIEN ==========
+        function renderCategories() {
+            const container = document.getElementById('categoryContainer');
+            if (!container) return;
+            const allCats = [...appData.categories, ...appData.customCategories];
+            if (allCats.length === 0) allCats = ['Allgemein'];
+            let html = '';
+            allCats.forEach(cat => {
+                const activeClass = (cat === selectedCategory) ? 'active' : '';
+                html += `<span class="category-chip ${activeClass}" data-category="${cat}"><i class="fas fa-tag"></i> ${cat}</span>`;
+            });
+            container.innerHTML = html;
+            document.querySelectorAll('.category-chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    selectedCategory = this.dataset.category;
+                    renderCategories();
+                });
+            });
+        }
+
+        // ========== SCHULDEN ==========
+        function renderDebts() {
+            const container = document.getElementById('debtsList');
+            if (!container) return;
+            if (appData.debts.length === 0) {
+                container.innerHTML = '<div style="padding: 20px; text-align: center; background: rgba(80,80,90,0.2); border-radius: 20px;"><i class="fas fa-check-circle" style="color:#34c759;"></i> Keine Schulden</div>';
+                return;
+            }
+
+            const reminderOn = document.getElementById('reminderToggle')?.checked || true;
+            const now = new Date().toISOString().split('T')[0];
+            let html = '';
+            appData.debts.forEach((debt) => {
+                const isOwe = debt.type === 'owe';
+                const sign = isOwe ? '→ Ich schulde' : '← Schuldet mir';
+                const color = isOwe ? '#ff3b30' : '#34c759';
+                const borderClass = isOwe ? 'owe' : '';
+                
+                const isOverdue = reminderOn && debt.dueDate && !debt.paid && debt.dueDate < now;
+                const reminderBadge = isOverdue ? '<span class="reminder-badge"><i class="fas fa-bell"></i> Überfällig</span>' : '';
+                const paidBadge = debt.paid ? '<span class="paid-badge"><i class="fas fa-check"></i> Bezahlt</span>' : '';
+                const purposeText = debt.purpose ? `<span style="color: #a1a1a8; font-size: 14px; margin-left: 8px;">📌 ${debt.purpose}</span>` : '';
+                const dueDateText = debt.dueDate ? `<span style="color: #a1a1a8; font-size: 12px; margin-left: 8px;"><i class="fas fa-calendar"></i> ${debt.dueDate}</span>` : '';
+
+                html += `<div class="debt-item ${borderClass}" style="border-left-color: ${color};">
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <i class="fas ${isOwe ? 'fa-arrow-up' : 'fa-arrow-down'}" style="color: ${color};"></i>
+                                        <strong style="font-size: 16px;">${debt.person}</strong>
+                                        <span style="color: ${color};">${sign}</span>
+                                        ${reminderBadge} ${paidBadge}
+                                    </div>
+                                    <div style="font-weight: 700; font-size: 18px;">€${debt.amount.toFixed(2)}</div>
+                                </div>
+                                <div style="display: flex; gap: 12px; align-items: center;">
+                                    ${purposeText}
+                                    ${dueDateText}
+                                </div>
+                            </div>`;
+                            
+                if (!debt.paid) {
+                    html += `<div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px;">
+                                <button class="paid-btn" data-id="${debt.id}" style="background: #34c759; color: black; padding: 8px 20px; border-radius: 30px;"><i class="fas fa-check-circle"></i> Abbezahlt</button>
+                                <button class="delete-debt-btn" data-id="${debt.id}" style="background: #ff3b3040; padding: 8px 20px; border-radius: 30px;"><i class="fas fa-trash"></i> Löschen</button>
+                            </div>`;
+                } else {
+                    html += `<div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px;">
+                                <button class="delete-debt-btn" data-id="${debt.id}" style="background: #ff3b3040; padding: 8px 20px; border-radius: 30px;"><i class="fas fa-trash"></i> Löschen</button>
+                            </div>`;
+                }
+                html += `</div>`;
+            });
+            container.innerHTML = html;
+
+            document.querySelectorAll('.paid-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = this.dataset.id;
+                    const debt = appData.debts.find(d => d.id === id);
+                    if (debt) {
+                        debt.paid = true;
+                        saveToCookie();
+                        renderDebts();
+                        refreshUI();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.delete-debt-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = this.dataset.id;
+                    appData.debts = appData.debts.filter(d => d.id !== id);
+                    saveToCookie();
+                    renderDebts();
+                    refreshUI();
+                });
+            });
+        }
+
+        // ========== KALENDER ==========
+        function renderCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            if (!calendarGrid) return;
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+            document.getElementById('calendarMonthYear').innerHTML = `${monthNames[month]} ${year}`;
+            
+            const firstDay = new Date(year, month, 1);
+            let startDayOfWeek = firstDay.getDay();
+            startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+            
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            
+            const prevMonthLastDay = new Date(year, month, 0);
+            const daysInPrevMonth = prevMonthLastDay.getDate();
+            
+            let html = '';
+            
+            for (let i = 0; i < startDayOfWeek; i++) {
+                const day = daysInPrevMonth - startDayOfWeek + i + 1;
+                html += `<div class="calendar-day other-month">${day}</div>`;
+            }
+            
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const isSelected = dateStr === selectedDate;
+                
+                const dayBalance = getDayBalance(dateStr);
+                let dayClass = 'calendar-day';
+                
+                if (isSelected) {
+                    dayClass += ' selected';
+                } else if (dayBalance > 0) {
+                    dayClass += ' positive';
+                } else if (dayBalance < 0) {
+                    dayClass += ' negative';
+                }
+                
+                html += `<div class="${dayClass}" data-date="${dateStr}">
+                            <span>${d}</span>
+                        </div>`;
+            }
+            
+            const totalCells = 42;
+            const nextMonthDays = totalCells - (startDayOfWeek + daysInMonth);
+            for (let d = 1; d <= nextMonthDays; d++) {
+                html += `<div class="calendar-day other-month">${d}</div>`;
+            }
+            
+            calendarGrid.innerHTML = html;
+            
+            document.querySelectorAll('.calendar-day[data-date]').forEach(day => {
+                day.addEventListener('click', function() {
+                    const date = this.dataset.date;
+                    if (date) {
+                        selectedDate = date;
+                        renderCalendar();
+                        
+                        const dayTransactions = appData.transactions.filter(t => {
+                            const txDate = new Date(t.timestamp).toISOString().split('T')[0];
+                            return txDate === date;
+                        });
+                        
+                        const formattedDate = new Date(date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                        openModal(`Tag: ${formattedDate}`, dayTransactions);
+                    }
+                });
+            });
+        }
+
+        // ========== CHART ==========
+        function getChartData(range) {
+            const now = Date.now();
+            let labels = [], values = [], cum = 0;
+            
+            if (chartType === 'pie') {
+                const expensesByCategory = {};
+                const startDate = now - 30 * 86400000;
+                appData.transactions.filter(t => t.type === 'payment' && t.timestamp >= startDate).forEach(t => {
+                    const cat = t.category || 'Allgemein';
+                    expensesByCategory[cat] = (expensesByCategory[cat] || 0) + t.amount;
+                });
+                labels = Object.keys(expensesByCategory);
+                values = Object.values(expensesByCategory);
+                if (labels.length === 0) {
+                    labels = ['Keine Ausgaben'];
+                    values = [0];
+                }
+                return { labels, values };
+            }
+            
+            if (range === 'week') {
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date(now - i*86400000);
+                    labels.push(d.toLocaleDateString('de-DE', { weekday: 'short' }));
+                    const start = new Date(d).setHours(0,0,0,0);
+                    const end = new Date(d).setHours(23,59,59,999);
+                    const dayTx = appData.transactions.filter(t => t.timestamp >= start && t.timestamp <= end);
+                    const bal = dayTx.reduce((acc, t) => t.type === 'intake' ? acc + t.amount : acc - t.amount, 0);
+                    cum += bal;
+                    values.push(cum);
+                }
+            } else if (range === 'month') {
+                for (let i = 4; i >= 0; i--) {
+                    labels.push(`Woche ${4-i}`);
+                    const start = now - i*7*86400000;
+                    const end = start + 6*86400000;
+                    const weekTx = appData.transactions.filter(t => t.timestamp >= start && t.timestamp <= end);
+                    const bal = weekTx.reduce((acc, t) => t.type === 'intake' ? acc + t.amount : acc - t.amount, 0);
+                    cum += bal; 
+                    values.push(cum);
+                }
+            } else {
+                for (let i = 3; i >= 0; i--) {
+                    labels.push(`Q${4-i}`);
+                    const start = now - i*90*86400000;
+                    const end = start + 89*86400000;
+                    const qTx = appData.transactions.filter(t => t.timestamp >= start && t.timestamp <= end);
+                    const bal = qTx.reduce((acc, t) => t.type === 'intake' ? acc + t.amount : acc - t.amount, 0);
+                    cum += bal; 
+                    values.push(cum);
+                }
+            }
+            return { labels, values };
+        }
+
+        function updateChart(range, type = chartType) {
+            const canvas = document.getElementById('balanceChart');
+            if (!canvas) return;
+            
+            const { labels, values } = getChartData(range);
+            const ctx = canvas.getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            
+            const config = {
+                type: type,
+                data: { 
+                    labels, 
+                    datasets: [{ 
+                        label: type === 'pie' ? 'Ausgaben nach Kategorie (€)' : 'Guthaben (€)',
+                        data: values,
+                        backgroundColor: type === 'pie' 
+                            ? ['#34c759', '#ff3b30', '#34c75980', '#ff3b3080', '#34c75960', '#ff3b3060']
+                            : values.map((v, i) => {
+                                if (i === 0) return '#34c759';
+                                return v >= values[i-1] ? '#34c759' : '#ff3b30';
+                            }),
+                        borderColor: type === 'line' ? '#34c759' : undefined,
+                        borderWidth: type === 'line' ? 2 : 0,
+                        tension: type === 'line' ? 0.1 : 0,
+                        fill: type === 'line' ? false : undefined,
+                        borderRadius: type === 'bar' ? 8 : 0,
+                        pointBackgroundColor: type === 'line' ? values.map((v, i) => {
+                            if (i === 0) return '#34c759';
+                            return v >= values[i-1] ? '#34c759' : '#ff3b30';
+                        }) : undefined,
+                        pointBorderColor: 'transparent',
+                        pointRadius: type === 'line' ? 4 : 0,
+                        pointHoverRadius: type === 'line' ? 6 : 0
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: true,
+                    plugins: { 
+                        legend: { 
+                            display: type === 'pie' ? true : false,
+                            labels: { color: 'white', font: { size: 11 } }
+                        },
+                        tooltip: { 
+                            callbacks: { 
+                                label: (ctx) => {
+                                    if (type === 'pie') return ` ${ctx.label}: €${ctx.raw.toFixed(2)}`;
+                                    return `€${ctx.raw.toFixed(2)}`;
+                                }
+                            } 
+                        }
+                    },
+                    scales: type !== 'pie' ? {
+                        y: { 
+                            grid: { color: 'rgba(255,255,255,0.05)' }, 
+                            ticks: { color: '#a1a1a8' } 
+                        },
+                        x: { ticks: { color: '#f0f0f4' } }
+                    } : {}
+                }
+            };
+            
+            chartInstance = new Chart(ctx, config);
+        }
+
+        // ========== UI REFRESH ==========
+        function refreshUI() {
+            const bal = getBalance();
+            document.getElementById('balanceDisplay').innerHTML = `€${bal.toFixed(2)}`;
+            
+            // Balance Prozent (Veränderung zum Vormonat)
+            const oldBal = getPeriodChange('month');
+            const balPercent = oldBal === 0 ? 0 : ((bal - oldBal) / Math.abs(oldBal)) * 100;
+            const balPercentEl = document.getElementById('balancePercent');
+            balPercentEl.innerHTML = balPercent >= 0 ? `+${balPercent.toFixed(1)}%` : `${balPercent.toFixed(1)}%`;
+            balPercentEl.style.color = balPercent >= 0 ? '#34c759' : '#ff3b30';
+            
+            // Monat
+            const monthData = getPreviousPeriodChange('month');
+            const monthDelta = monthData.current;
+            const monthEl = document.getElementById('monthChange');
+            monthEl.innerHTML = monthDelta >= 0 ? `+€${monthDelta.toFixed(2)}` : `-€${Math.abs(monthDelta).toFixed(2)}`;
+            monthEl.style.color = monthDelta >= 0 ? '#34c759' : '#ff3b30';
+            
+            const monthPercent = monthData.previous === 0 ? 0 : ((monthDelta - monthData.previous) / Math.abs(monthData.previous)) * 100;
+            const monthPercentEl = document.getElementById('monthPercent');
+            monthPercentEl.innerHTML = monthPercent >= 0 ? `+${monthPercent.toFixed(1)}%` : `${monthPercent.toFixed(1)}%`;
+            monthPercentEl.style.color = monthPercent >= 0 ? '#34c759' : '#ff3b30';
+            
+            // Woche
+            const weekData = getPreviousPeriodChange('week');
+            const weekDelta = weekData.current;
+            const weekEl = document.getElementById('weekChange');
+            weekEl.innerHTML = weekDelta >= 0 ? `+€${weekDelta.toFixed(2)}` : `-€${Math.abs(weekDelta).toFixed(2)}`;
+            weekEl.style.color = weekDelta >= 0 ? '#34c759' : '#ff3b30';
+            
+            const weekPercent = weekData.previous === 0 ? 0 : ((weekDelta - weekData.previous) / Math.abs(weekData.previous)) * 100;
+            const weekPercentEl = document.getElementById('weekPercent');
+            weekPercentEl.innerHTML = weekPercent >= 0 ? `+${weekPercent.toFixed(1)}%` : `${weekPercent.toFixed(1)}%`;
+            weekPercentEl.style.color = weekPercent >= 0 ? '#34c759' : '#ff3b30';
+            
+            renderDebts();
+            updateChart(rangeType, chartType);
+            renderCalendar();
+        }
+
+        // ========== INIT ==========
+        function initializeApp() {
+            loadFromCookie();
+            
+            if (appData.transactions.length === 0) {
+                const now = Date.now();
+                appData.transactions.push({ amount: 2450, type: 'intake', timestamp: now - 2*86400000, category: 'Gehalt' });
+                appData.transactions.push({ amount: 84.50, type: 'payment', timestamp: now - 3*86400000, category: 'Lebensmittel' });
+                appData.transactions.push({ amount: 42.30, type: 'payment', timestamp: now - 5*86400000, category: 'Transport' });
+                appData.transactions.push({ amount: 120, type: 'intake', timestamp: now - 7*86400000, category: 'Freizeit' });
+                appData.transactions.push({ amount: 67.80, type: 'payment', timestamp: now - 8*86400000, category: 'Wohnen' });
+            }
+            
+            if (appData.debts.length === 0) {
+                const today = new Date();
+                const nextWeek = new Date(today);
+                nextWeek.setDate(today.getDate() + 7);
+                const lastMonth = new Date(today);
+                lastMonth.setDate(today.getDate() - 20);
+                
+                appData.debts.push({ 
+                    person: 'Lisa', 
+                    amount: 55, 
+                    type: 'owed', 
+                    purpose: 'Konzertkarten', 
+                    dueDate: nextWeek.toISOString().split('T')[0],
+                    id: crypto.randomUUID ? crypto.randomUUID() : '1', 
+                    createdAt: Date.now() - 20*86400000, 
+                    paid: false 
+                });
+                
+                appData.debts.push({ 
+                    person: 'Tom', 
+                    amount: 30, 
+                    type: 'owe', 
+                    purpose: 'Mittagessen', 
+                    dueDate: lastMonth.toISOString().split('T')[0],
+                    id: crypto.randomUUID ? crypto.randomUUID() : '2', 
+                    createdAt: Date.now() - 5*86400000, 
+                    paid: false 
+                });
+            }
+            
+            saveToCookie();
+            renderCategories();
+            refreshUI();
+            initEventListeners();
+            
+            // Standardmäßig zugeklappt: Währung + Datenverwaltung
+            document.getElementById('section2')?.classList.add('collapsed');
+            document.getElementById('chevron2')?.classList.remove('rotated');
+            document.getElementById('section5')?.classList.add('collapsed');
+            document.getElementById('chevron5')?.classList.remove('rotated');
+            
+            // Diagramm-Buttons aktiv setzen
+            document.getElementById('chartBarBtn').classList.add('active');
+            document.getElementById('chartBarBtn').style.background = '#34c759';
+            document.getElementById('chartBarBtn').style.color = 'white';
+            
+            const today = new Date().toISOString().split('T')[0];
+            const dueDateInput = document.getElementById('debtDueDateInput');
+            if (dueDateInput) dueDateInput.value = today;
+            
+            renderCalendar();
+        }
+
+        // ========== EVENT LISTENER ==========
+        function initEventListeners() {
+            // Reset Buttons
+            document.getElementById('hardResetBtn')?.addEventListener('click', hardReset);
+            document.getElementById('softResetBtn')?.addEventListener('click', softReset);
+
+            // Transaktion
+            document.getElementById('addTransactionBtn')?.addEventListener('click', function() {
+                const amount = parseFloat(document.getElementById('amountInput').value);
+                const type = document.getElementById('typeSelect').value;
+                if (!amount || amount <= 0) { 
+                    alert('Bitte Betrag eingeben'); 
+                    return; 
+                }
+                appData.transactions.push({
+                    amount, 
+                    type,
+                    category: selectedCategory || 'Allgemein',
+                    timestamp: Date.now()
+                });
+                saveToCookie();
+                refreshUI();
+                document.getElementById('amountInput').value = '';
+            });
+
+            // Kategorie
+            document.getElementById('addCategoryBtn')?.addEventListener('click', function() {
+                const newCat = document.getElementById('newCategoryInput').value.trim();
+                if (newCat) {
+                    if (!appData.categories.includes(newCat) && !appData.customCategories.includes(newCat)) {
+                        appData.customCategories.push(newCat);
+                        saveToCookie();
+                        renderCategories();
+                        document.getElementById('newCategoryInput').value = '';
+                    } else {
+                        alert('Kategorie existiert bereits');
+                    }
+                }
+            });
+
+            // Schulden
+            document.getElementById('addDebtBtn')?.addEventListener('click', function() {
+                const person = document.getElementById('debtPersonInput').value.trim();
+                const amount = parseFloat(document.getElementById('debtAmountInput').value);
+                const purpose = document.getElementById('debtPurposeInput').value.trim();
+                const dueDate = document.getElementById('debtDueDateInput').value;
+                
+                if (!person || !amount || amount <= 0) { 
+                    alert('Name und Betrag erforderlich'); 
+                    return; 
+                }
+                
+                appData.debts.push({
+                    person, 
+                    amount: parseFloat(amount), 
+                    type: 'owe',
+                    purpose: purpose || '',
+                    dueDate: dueDate || '',
+                    id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '',
+                    createdAt: Date.now(), 
+                    paid: false
+                });
+                saveToCookie();
+                renderDebts();
+                
+                document.getElementById('debtPersonInput').value = '';
+                document.getElementById('debtAmountInput').value = '';
+                document.getElementById('debtPurposeInput').value = '';
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('debtDueDateInput').value = today;
+            });
+            
+            document.getElementById('addOwedBtn')?.addEventListener('click', function() {
+                const person = document.getElementById('debtPersonInput').value.trim();
+                const amount = parseFloat(document.getElementById('debtAmountInput').value);
+                const purpose = document.getElementById('debtPurposeInput').value.trim();
+                const dueDate = document.getElementById('debtDueDateInput').value;
+                
+                if (!person || !amount || amount <= 0) { 
+                    alert('Name und Betrag erforderlich'); 
+                    return; 
+                }
+                
+                appData.debts.push({
+                    person, 
+                    amount: parseFloat(amount), 
+                    type: 'owed',
+                    purpose: purpose || '',
+                    dueDate: dueDate || '',
+                    id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '',
+                    createdAt: Date.now(), 
+                    paid: false
+                });
+                saveToCookie();
+                renderDebts();
+                
+                document.getElementById('debtPersonInput').value = '';
+                document.getElementById('debtAmountInput').value = '';
+                document.getElementById('debtPurposeInput').value = '';
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('debtDueDateInput').value = today;
+            });
+
+            // Währung
+            document.getElementById('convertBtn')?.addEventListener('click', function() {
+                const amt = parseFloat(document.getElementById('convAmount').value) || 1;
+                const from = document.getElementById('convFrom').value;
+                const to = document.getElementById('convTo').value;
+                const rate = from === to ? 1 : exchangeRates[from][to] || 1;
+                const result = amt * rate;
+                const symbol = to === 'EUR' ? '€' : to === 'USD' ? '$' : to === 'GBP' ? '£' : to === 'CHF' ? '₣' : to === 'JPY' ? '¥' : '₺';
+                document.getElementById('convResult').value = `${result.toFixed(2)} ${symbol} ${to}`;
+            });
+            document.getElementById('convertBtn')?.click();
+
+            // Chart Range
+            document.getElementById('rangeWeekBtn')?.addEventListener('click', function() { 
+                rangeType = 'week'; 
+                updateChart('week', chartType); 
+            });
+            document.getElementById('rangeMonthBtn')?.addEventListener('click', function() { 
+                rangeType = 'month'; 
+                updateChart('month', chartType); 
+            });
+            document.getElementById('rangeYearBtn')?.addEventListener('click', function() { 
+                rangeType = 'year'; 
+                updateChart('year', chartType); 
+            });
+
+            // Diagramm-Typ Wechsel
+            document.getElementById('chartBarBtn')?.addEventListener('click', function() {
+                chartType = 'bar';
+                document.querySelectorAll('.chart-type-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.style.background = 'rgba(80, 80, 90, 0.3)';
+                    btn.style.color = 'white';
+                });
+                this.classList.add('active');
+                this.style.background = '#34c759';
+                this.style.color = 'white';
+                updateChart(rangeType, 'bar');
+            });
+            
+            document.getElementById('chartPieBtn')?.addEventListener('click', function() {
+                chartType = 'pie';
+                document.querySelectorAll('.chart-type-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.style.background = 'rgba(80, 80, 90, 0.3)';
+                    btn.style.color = 'white';
+                });
+                this.classList.add('active');
+                this.style.background = '#34c759';
+                this.style.color = 'white';
+                updateChart(rangeType, 'pie');
+            });
+            
+            document.getElementById('chartLineBtn')?.addEventListener('click', function() {
+                chartType = 'line';
+                document.querySelectorAll('.chart-type-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.style.background = 'rgba(80, 80, 90, 0.3)';
+                    btn.style.color = 'white';
+                });
+                this.classList.add('active');
+                this.style.background = '#34c759';
+                this.style.color = 'white';
+                updateChart(rangeType, 'line');
+            });
+
+            // Kalender Navigation
+            document.getElementById('prevMonthBtn')?.addEventListener('click', function() {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+            
+            document.getElementById('nextMonthBtn')?.addEventListener('click', function() {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+            
+            // Zeitraum-Auswertung
+            document.getElementById('applyDateRangeBtn')?.addEventListener('click', function() {
+                const start = document.getElementById('dateRangeStart').value;
+                const end = document.getElementById('dateRangeEnd').value;
+                
+                if (!start || !end) {
+                    alert('Bitte Start- und Enddatum auswählen');
+                    return;
+                }
+                
+                const startDate = new Date(start);
+                startDate.setHours(0, 0, 0, 0);
+                const endDate = new Date(end);
+                endDate.setHours(23, 59, 59, 999);
+                
+                const rangeTransactions = appData.transactions.filter(t => {
+                    const txDate = new Date(t.timestamp);
+                    return txDate >= startDate && txDate <= endDate;
+                });
+                
+                const formattedStart = startDate.toLocaleDateString('de-DE');
+                const formattedEnd = endDate.toLocaleDateString('de-DE');
+                
+                openModal(`Zeitraum: ${formattedStart} - ${formattedEnd}`, rangeTransactions);
+            });
+
+            // Export / Import
+            document.getElementById('exportDataBtn')?.addEventListener('click', function() {
+                const blob = new Blob([JSON.stringify(appData, null, 2)], {type: 'application/json'});
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'ifinance_backup.json';
+                a.click();
+            });
+            
+            document.getElementById('importDataBtn')?.addEventListener('click', function() {
+                document.getElementById('importFileInput').click();
+            });
+            
+            document.getElementById('importFileInput')?.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    try {
+                        const imported = JSON.parse(ev.target.result);
+                        if (imported.transactions) {
+                            appData = imported;
+                            saveToCookie();
+                            refreshUI();
+                            renderCategories();
+                            renderCalendar();
+                            alert('Import erfolgreich!');
+                        }
+                    } catch(ex) { 
+                        alert('Ungültige Datei'); 
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            // Reminder Toggle
+            document.getElementById('reminderToggle')?.addEventListener('change', function() {
+                renderDebts();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>
